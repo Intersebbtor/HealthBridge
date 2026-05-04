@@ -2,6 +2,8 @@
 
 HealthBridge bridges your health data from Android's **Health Connect** to your **macOS** desktop. Monitor your steps and heart rate in real-time directly from your Mac's menu bar.
 
+> **Disclaimer:** This project was developed primarily by a single developer with significant assistance from AI. While functional, it is provided "as is" and should be used at your own risk.
+
 ## Features
 
 - **Real-time Sync:** Seamlessly pushes health data from your Android device to your Mac.
@@ -10,6 +12,12 @@ HealthBridge bridges your health data from Android's **Health Connect** to your 
 - **Secure Pairing:** Quick QR code pairing for a secure initial setup.
 - **Menu Bar App:** A minimalist tray icon for macOS to see current stats at a glance.
 - **Modern Dashboard:** A beautiful, modern interface for detailed data visualization.
+
+## Roadmap
+
+- **Step Goals:** Setting and tracking personalized daily activity targets.
+- **Notifications:** Alerts when step goals are reached.
+- **Expanded Platform Support:** Future support for Windows and Linux.
 
 ## Getting Started
 
@@ -36,6 +44,10 @@ You can find the latest release artifacts in the `release_artifacts/` folder:
 - `composeApp/`: The Android application (Kotlin/Compose).
 - `desktop/`: The macOS desktop application.
 - `release_artifacts/`: Compiled binaries for easy download.
+
+## Contribute
+
+Contributions are highly welcome! Whether it's bug reports, feature requests, or pull requests, feel free to join the project and help us bridge the gap between platforms.
 
 ## License
 

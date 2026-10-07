@@ -9,6 +9,15 @@ HealthBridge pushes your daily steps and heart rate from Android's Health Connec
 ![Platforms](https://img.shields.io/badge/platforms-Android%20%7C%20macOS-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
+<p align="center">
+  <img src="docs/screenshots/macos-dashboard.png" alt="HealthBridge dashboard on macOS" width="560">
+</p>
+<p align="center">
+  <img src="docs/screenshots/macos-menubar.png" alt="HealthBridge menu bar menu" width="240">
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/screenshots/android-app.png" alt="HealthBridge Android app" width="240">
+</p>
+
 ## Why
 
 I walk on a treadmill desk and wear my tracker on my ankle, so I can't glance at my wrist to see my steps. The numbers are already in Health Connect on my phone. HealthBridge just puts them where I'm already looking: the Mac menu bar.

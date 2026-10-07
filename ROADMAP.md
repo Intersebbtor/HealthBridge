@@ -31,6 +31,7 @@ _Last updated: 2026-10-07_
 | 6 | DMG is arm64 only, not signed or notarized. | Intel Macs not supported, Gatekeeper warning on first launch. |
 | 7 | No tests and no CI. | Regressions go unnoticed. |
 | 8 | Old Gradle/Kotlin stack (Kotlin 1.9.20, Compose 1.5.11, AGP 8.2.2). | Harder to build with current toolchains. |
+| 9 | The v1.0.0 DMG was built from code that is not fully in the repo (e.g. the "Buy me a coffee" button exists in the binary, not in `main.kt`). | Building from source gives a slightly different app than the release. |
 
 ## Next
 
@@ -54,4 +55,5 @@ _Last updated: 2026-10-07_
 - [ ] Universal (arm64 + x86_64) DMG, signing and notarization.
 - [ ] Windows and Linux packages (Compose Desktop supports both).
 - [ ] Final logo and consistent Material 3 theme across Android and desktop.
-- [ ] Screenshots and a short demo GIF for the README.
+- [x] Screenshots for the README.
+- [ ] Short demo GIF for the README.

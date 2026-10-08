@@ -35,7 +35,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg)
             packageName = "HealthBridge"
-            packageVersion = "1.0.0"
+            packageVersion = "1.1.0"
             macOS {
                 iconFile.set(project.file("src/main/resources/icons/icon.icns"))
             }

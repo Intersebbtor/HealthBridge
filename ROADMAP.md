@@ -2,7 +2,7 @@
 
 _Last updated: 2026-10-08_
 
-## Current state (v1.0.0)
+## Current state (v1.1.0)
 
 **Working**
 
@@ -12,7 +12,7 @@ _Last updated: 2026-10-08_
 - macOS: Ktor server on port `8080` with `POST /api/sync` (Bearer token).
 - macOS: Menu bar (template icon) menu with steps, goal progress and heart rate. Dashboard with step ring, heart rate, connection status, last sync time, light/dark mode, QR pairing dialog.
 - Android: Redesigned dashboard with step ring, pairing and sync interval chips, follows the system theme.
-- Release v1.0.0 with DMG (arm64) and APK. The redesign below is on `main` and not released yet.
+- Release v1.1.0 with DMG (arm64) and APK, built from this repo.
 
 **Not there yet**
 
@@ -32,7 +32,6 @@ _Last updated: 2026-10-08_
 | 6 | DMG is arm64 only, not signed or notarized. | Intel Macs not supported, Gatekeeper warning on first launch. |
 | 7 | No tests and no CI. | Regressions go unnoticed. |
 | 8 | Old Gradle/Kotlin stack (Kotlin 1.9.20, Compose 1.5.11, AGP 8.2.2). | Harder to build with current toolchains. |
-| 9 | The v1.0.0 DMG was built from code that is not fully in the repo (e.g. the "Buy me a coffee" button exists in the binary, not in the source). | Resolved on `main` with the UI redesign, the next release will be built from the repo. |
 
 ## Next
 
@@ -58,5 +57,5 @@ _Last updated: 2026-10-08_
 - [ ] Windows and Linux packages (Compose Desktop supports both).
 - [x] Final logo and consistent Material 3 theme across Android and desktop.
 - [x] Screenshots for the README.
-- [ ] Menu bar screenshot with the new template icon.
+- [x] Menu bar screenshot with the new template icon.
 - [ ] Short demo GIF for the README.

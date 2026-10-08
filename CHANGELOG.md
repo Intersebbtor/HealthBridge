@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.1.0] - 2026-10-08
 
 ### Changed
 
@@ -26,4 +26,5 @@ Initial public release bridging health data from Android's Health Connect to mac
 - macOS menu bar menu and dashboard window with current values.
 - mDNS discovery and QR code pairing.
 
+[1.1.0]: https://github.com/Intersebbtor/HealthBridge/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Intersebbtor/HealthBridge/releases/tag/v1.0.0

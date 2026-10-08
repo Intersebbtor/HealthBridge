@@ -16,6 +16,9 @@ HealthBridge pushes your daily steps and heart rate from Android's Health Connec
   &nbsp;
   <img src="docs/screenshots/android-app.png" alt="HealthBridge Android app" width="190">
 </p>
+<p align="center">
+  <img src="docs/screenshots/macos-menubar.png" alt="HealthBridge menu bar menu" width="214">
+</p>
 
 ## Why
 

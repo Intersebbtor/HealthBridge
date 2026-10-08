@@ -34,8 +34,12 @@ import androidx.health.connect.client.PermissionController
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.sp
+import java.text.NumberFormat
 import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -51,6 +55,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<Set<String>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         healthConnectManager = HealthConnectManager(this)
         discoveryManager = DiscoveryManager(this)
@@ -93,7 +98,8 @@ fun HealthBridgeApp(
     var isScanning by remember { mutableStateOf(false) }
     var syncIntervalStr by remember { mutableStateOf("10") }
     var discoveredServer by remember { mutableStateOf<String?>(null) }
-    var isDarkMode by remember { mutableStateOf(true) }
+    val systemDark = isSystemInDarkTheme()
+    var isDarkMode by remember { mutableStateOf(systemDark) }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -147,156 +153,179 @@ fun HealthBridgeApp(
         }
     }
 
-    MaterialTheme(colorScheme = if (isDarkMode) darkColorScheme() else lightColorScheme()) {
+    HealthBridgeTheme(isDarkMode) {
+        val surfaces = LocalSurfaces.current
+        val muted = surfaces.muted
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             if (isScanning) {
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
                     QRScanner { ip, token ->
                         serverIp = ip
                         apiToken = token
                         isScanning = false
                     }
+                    Box(
+                        Modifier.align(Alignment.Center).size(260.dp)
+                            .border(3.dp, Brand.Teal, RoundedCornerShape(28.dp))
+                    )
+                    Column(
+                        Modifier.align(Alignment.TopCenter).fillMaxWidth()
+                            .windowInsetsPadding(WindowInsets.safeDrawing).padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("Scan the QR code", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(6.dp))
+                        Text("Click \"Pair phone\" on your Mac to show it.", color = Color.White.copy(alpha = 0.75f), fontSize = 14.sp)
+                    }
                     IconButton(
                         onClick = { isScanning = false },
-                        modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+                        modifier = Modifier.align(Alignment.TopEnd).windowInsetsPadding(WindowInsets.safeDrawing).padding(8.dp)
                     ) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
                     }
                 }
             } else {
-                Column(modifier = Modifier.fillMaxSize().padding(20.dp).verticalScroll(rememberScrollState())) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(modifier = Modifier.size(50.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_shoe),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(8.dp)
-                                )
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .windowInsetsPadding(WindowInsets.safeDrawing)
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Header
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        AppLogo(44.dp)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text("HealthBridge", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                            Spacer(Modifier.height(4.dp))
+                            when {
+                                serverIp.isNotEmpty() -> StatusPill(LinkState.Connected, "Syncing to your Mac")
+                                discoveredServer != null -> StatusPill(LinkState.Stale, "Mac found")
+                                else -> StatusPill(LinkState.Waiting, "Not paired")
                             }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text("HealthBridge", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                         }
                         IconButton(onClick = { isDarkMode = !isDarkMode }) {
-                            Icon(if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode, contentDescription = "Theme")
+                            Icon(if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode, contentDescription = "Theme", tint = muted)
                         }
                     }
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     if (sdkStatus != HealthConnectClient.SDK_AVAILABLE) {
-                        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text("Health Connect Unavailable", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text("Please install Health Connect to use this app.")
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Button(onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.healthdata"))) }) {
-                                    Text("Install Health Connect")
-                                }
-                            }
-                        }
+                        NoticeCard(
+                            Icons.Default.HealthAndSafety, Brand.Heart, "Health Connect unavailable",
+                            "Install Health Connect to let HealthBridge read your steps and heart rate.",
+                            "Install Health Connect"
+                        ) { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.healthdata"))) }
                     } else if (!permissionsGranted) {
-                        Card(modifier = Modifier.fillMaxWidth()) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text("Permissions Required", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text("HealthBridge needs access to your health data to sync it with your desktop.")
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Button(onClick = { requestPermissionLauncher.launch(healthConnectManager.permissions) }) {
-                                    Text("Grant Health Permissions")
-                                }
-                            }
-                        }
+                        NoticeCard(
+                            Icons.Default.Lock, Brand.Teal, "Permissions required",
+                            "HealthBridge needs read access to steps and heart rate to show them on your Mac.",
+                            "Grant permissions"
+                        ) { requestPermissionLauncher.launch(healthConnectManager.permissions) }
                     } else {
-                        // Metrics Row
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            MetricCard("Steps Today", "$stepsToday", Icons.Default.DirectionsWalk, MaterialTheme.colorScheme.primary, Modifier.weight(1f))
-                            MetricCard("Heart Rate", if (lastHeartRate > 0) "$lastHeartRate bpm" else "--", Icons.Default.Favorite, MaterialTheme.colorScheme.error, Modifier.weight(1f))
-                        }
+                        val progress = stepsToday.toFloat() / DAILY_STEP_GOAL
+                        val remaining = (DAILY_STEP_GOAL - stepsToday).coerceAtLeast(0)
 
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        // Pairing Card
-                        Card(modifier = Modifier.fillMaxWidth()) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.SettingsRemote, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Desktop Pairing", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
-                                
-                                if (serverIp.isEmpty()) {
-                                    Text("Not paired with any desktop server.", style = MaterialTheme.typography.bodyMedium)
-                                    if (discoveredServer != null) {
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Text("Found server at $discoveredServer", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
-                                    }
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Button(
-                                        onClick = { isScanning = true },
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Icon(Icons.Default.QrCodeScanner, contentDescription = null)
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text("Scan Pairing QR")
-                                    }
-                                } else {
-                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                        Column {
-                                            Text("Paired with:", style = MaterialTheme.typography.labelMedium)
-                                            Text(serverIp, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                                        }
-                                        TextButton(onClick = { serverIp = ""; apiToken = "" }) {
-                                            Text("Reset", color = MaterialTheme.colorScheme.error)
-                                        }
+                        // Steps hero
+                        BridgeCard(Modifier.fillMaxWidth()) {
+                            Text("Steps today", fontSize = 13.sp, color = muted, fontWeight = FontWeight.Medium)
+                            Box(Modifier.fillMaxWidth().padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
+                                StepRing(progress, 210.dp, 16.dp) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(formatCount(stepsToday), fontSize = 40.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
+                                        Text("of ${formatCount(DAILY_STEP_GOAL)}", fontSize = 13.sp, color = muted)
                                     }
                                 }
                             }
+                            Text(
+                                if (remaining == 0L) "Daily goal reached" else "${(progress * 100).toInt()}% of your daily goal",
+                                Modifier.fillMaxWidth(), textAlign = TextAlign.Center,
+                                fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary
+                            )
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            MetricTile(
+                                Icons.Default.Favorite, Brand.Heart, "Heart rate",
+                                if (lastHeartRate > 0) "$lastHeartRate" else "--", "bpm", Modifier.weight(1f)
+                            )
+                            MetricTile(
+                                if (remaining == 0L) Icons.Default.EmojiEvents else Icons.Default.DirectionsWalk, Brand.Teal, "To go",
+                                formatCount(remaining), "steps", Modifier.weight(1f)
+                            )
+                        }
 
-                        // Interval Card
-                        Card(modifier = Modifier.fillMaxWidth()) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Timer, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Sync Frequency", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
-                                
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    Text("Sync metrics every", style = MaterialTheme.typography.bodyMedium)
-                                    OutlinedTextField(
-                                        value = syncIntervalStr,
-                                        onValueChange = { if (it.all { c -> c.isDigit() }) syncIntervalStr = it },
-                                        modifier = Modifier.width(80.dp),
-                                        singleLine = true,
-                                        textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        // Pairing
+                        BridgeCard(Modifier.fillMaxWidth()) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconBadge(Icons.Default.Laptop, Brand.Blue)
+                                Spacer(Modifier.width(14.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text("Your Mac", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                                    Text(
+                                        when {
+                                            serverIp.isNotEmpty() -> "Paired with $serverIp"
+                                            discoveredServer != null -> "Found on your network"
+                                            else -> "Not paired yet"
+                                        },
+                                        fontSize = 13.sp, color = muted
                                     )
-                                    Text("seconds", style = MaterialTheme.typography.bodyMedium)
+                                }
+                                if (serverIp.isNotEmpty()) {
+                                    TextButton(onClick = { serverIp = ""; apiToken = "" }) {
+                                        Text("Unpair", color = MaterialTheme.colorScheme.error)
+                                    }
+                                }
+                            }
+                            if (serverIp.isEmpty()) {
+                                Spacer(Modifier.height(16.dp))
+                                Button(onClick = { isScanning = true }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
+                                    Icon(Icons.Default.QrCodeScanner, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Scan pairing QR", fontWeight = FontWeight.SemiBold)
                                 }
                             }
                         }
-                        
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationPermissionGranted) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-                                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text("Notifications Disabled", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                                        Text("Enabled notifications for better sync reliability.", style = MaterialTheme.typography.bodySmall)
-                                    }
-                                    Button(onClick = { notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) }) {
-                                        Text("Enable")
-                                    }
+
+                        // Sync interval
+                        BridgeCard(Modifier.fillMaxWidth()) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconBadge(Icons.Default.Sync, Brand.Teal)
+                                Spacer(Modifier.width(14.dp))
+                                Column {
+                                    Text("Sync interval", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                                    Text("How often your Mac gets fresh numbers", fontSize = 13.sp, color = muted)
                                 }
                             }
+                            Spacer(Modifier.height(14.dp))
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                listOf("5", "10", "30", "60").forEach { sec ->
+                                    FilterChip(
+                                        selected = syncIntervalStr == sec,
+                                        onClick = { syncIntervalStr = sec },
+                                        label = { Text("$sec s", Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                                            selectedLabelColor = MaterialTheme.colorScheme.primary,
+                                            labelColor = muted
+                                        ),
+                                        border = FilterChipDefaults.filterChipBorder(
+                                            borderColor = surfaces.border,
+                                            selectedBorderColor = Color.Transparent
+                                        )
+                                    )
+                                }
+                            }
+                        }
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationPermissionGranted) {
+                            NoticeCard(
+                                Icons.Default.NotificationsOff, Brand.Amber, "Notifications disabled",
+                                "Allow notifications so background sync keeps running reliably.",
+                                "Enable"
+                            ) { notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) }
                         }
                     }
                 }
@@ -305,15 +334,60 @@ fun HealthBridgeApp(
     }
 }
 
+const val DAILY_STEP_GOAL = 10_000L
+
+fun formatCount(n: Long): String = NumberFormat.getIntegerInstance().format(n)
+
 @Composable
-fun MetricCard(title: String, value: String, icon: androidx.compose.ui.graphics.vector.ImageVector, color: Color, modifier: Modifier) {
-    Card(modifier = modifier, shape = RoundedCornerShape(16.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
+fun AppLogo(size: androidx.compose.ui.unit.Dp) {
+    Box(
+        Modifier.size(size).clip(RoundedCornerShape(size * 0.27f)).background(Brand.gradient),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_launcher_foreground),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.requiredSize(size * 1.45f)
+        )
+    }
+}
+
+@Composable
+fun IconBadge(icon: ImageVector, tint: Color) {
+    Box(Modifier.size(40.dp).background(tint.copy(alpha = 0.15f), CircleShape), contentAlignment = Alignment.Center) {
+        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(22.dp))
+    }
+}
+
+@Composable
+fun MetricTile(icon: ImageVector, tint: Color, label: String, value: String, unit: String, modifier: Modifier) {
+    val muted = LocalSurfaces.current.muted
+    BridgeCard(modifier) {
+        IconBadge(icon, tint)
+        Spacer(Modifier.height(16.dp))
+        Text(label, fontSize = 13.sp, color = muted, fontWeight = FontWeight.Medium)
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(value, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Spacer(Modifier.width(4.dp))
+            Text(unit, fontSize = 13.sp, color = muted, modifier = Modifier.padding(bottom = 4.dp))
         }
     }
 }
 
+@Composable
+fun NoticeCard(icon: ImageVector, tint: Color, title: String, text: String, action: String, onAction: () -> Unit) {
+    BridgeCard(Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconBadge(icon, tint)
+            Spacer(Modifier.width(14.dp))
+            Text(title, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(text, fontSize = 14.sp, color = LocalSurfaces.current.muted, lineHeight = 20.sp)
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onAction, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
+            Text(action, fontWeight = FontWeight.SemiBold)
+        }
+    }
+}

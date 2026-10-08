@@ -1,6 +1,6 @@
 # Roadmap and current state
 
-_Last updated: 2026-10-07_
+_Last updated: 2026-10-08_
 
 ## Current state (v1.0.0)
 
@@ -10,8 +10,9 @@ _Last updated: 2026-10-07_
 - Android: Foreground service that syncs on a configurable interval (default 10 s).
 - Android: mDNS discovery of the Mac and QR code pairing as fallback.
 - macOS: Ktor server on port `8080` with `POST /api/sync` (Bearer token).
-- macOS: Menu bar (tray) menu with steps and heart rate, dashboard window with metric cards, last sync time, light/dark toggle.
-- Release v1.0.0 with DMG (arm64) and APK.
+- macOS: Menu bar (template icon) menu with steps, goal progress and heart rate. Dashboard with step ring, heart rate, connection status, last sync time, light/dark mode, QR pairing dialog.
+- Android: Redesigned dashboard with step ring, pairing and sync interval chips, follows the system theme.
+- Release v1.0.0 with DMG (arm64) and APK. The redesign below is on `main` and not released yet.
 
 **Not there yet**
 
@@ -31,7 +32,7 @@ _Last updated: 2026-10-07_
 | 6 | DMG is arm64 only, not signed or notarized. | Intel Macs not supported, Gatekeeper warning on first launch. |
 | 7 | No tests and no CI. | Regressions go unnoticed. |
 | 8 | Old Gradle/Kotlin stack (Kotlin 1.9.20, Compose 1.5.11, AGP 8.2.2). | Harder to build with current toolchains. |
-| 9 | The v1.0.0 DMG was built from code that is not fully in the repo (e.g. the "Buy me a coffee" button exists in the binary, not in `main.kt`). | Building from source gives a slightly different app than the release. |
+| 9 | The v1.0.0 DMG was built from code that is not fully in the repo (e.g. the "Buy me a coffee" button exists in the binary, not in the source). | Resolved on `main` with the UI redesign, the next release will be built from the repo. |
 
 ## Next
 
@@ -44,7 +45,8 @@ _Last updated: 2026-10-07_
 
 **Features**
 
-- [ ] Daily step goal with progress in the menu bar (e.g. `6,240 / 10,000`).
+- [x] Daily step goal with progress ring and menu bar progress (fixed at 10,000).
+- [ ] Make the daily step goal configurable.
 - [ ] Notification on the Mac when the step goal is reached.
 - [ ] Steps directly in the menu bar title, not only in the dropdown.
 - [ ] Sleep summary of last night.
@@ -54,6 +56,7 @@ _Last updated: 2026-10-07_
 
 - [ ] Universal (arm64 + x86_64) DMG, signing and notarization.
 - [ ] Windows and Linux packages (Compose Desktop supports both).
-- [ ] Final logo and consistent Material 3 theme across Android and desktop.
+- [x] Final logo and consistent Material 3 theme across Android and desktop.
 - [x] Screenshots for the README.
+- [ ] Menu bar screenshot with the new template icon.
 - [ ] Short demo GIF for the README.

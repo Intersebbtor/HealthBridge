@@ -14,22 +14,24 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.jmdns.JmDNS
 import javax.jmdns.ServiceInfo
 import java.net.InetAddress
+import java.time.Instant
 import java.util.UUID
 
 class HealthBridgeServer {
     private val _receivedMetrics = MutableStateFlow<Map<String, JsonElement>>(emptyMap())
     val receivedMetrics: StateFlow<Map<String, JsonElement>> = _receivedMetrics
 
-    private val _lastSync = MutableStateFlow<String?>(null)
-    val lastSync: StateFlow<String?> = _lastSync
+    private val _lastSyncAt = MutableStateFlow<Instant?>(null)
+    val lastSyncAt: StateFlow<Instant?> = _lastSyncAt
 
     val apiToken = UUID.randomUUID().toString()
     private var jmdns: JmDNS? = null
     private var server: NettyApplicationEngine? = null
 
+    val port = 8080
+
     fun start() {
-        val port = 8080
-        
+
         // Start mDNS advertising in a separate thread to not block or crash the main server
         Thread {
             try {
@@ -73,7 +75,7 @@ class HealthBridgeServer {
                     val metrics = body["metrics"]?.jsonObject ?: emptyMap()
                     
                     _receivedMetrics.value = metrics
-                    _lastSync.value = java.time.LocalTime.now().withNano(0).toString()
+                    _lastSyncAt.value = Instant.now()
                     
                     call.respond(mapOf("status" to "success"))
                 }

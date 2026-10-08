@@ -1,4 +1,6 @@
-# HealthBridge
+<p align="center"><img src="docs/icon.png" alt="HealthBridge icon" width="112"></p>
+
+<h1 align="center">HealthBridge</h1>
 
 **See your Android Health Connect stats on your Mac, without picking up your phone.**
 
@@ -10,12 +12,9 @@ HealthBridge pushes your daily steps and heart rate from Android's Health Connec
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 <p align="center">
-  <img src="docs/screenshots/macos-dashboard.png" alt="HealthBridge dashboard on macOS" width="560">
-</p>
-<p align="center">
-  <img src="docs/screenshots/macos-menubar.png" alt="HealthBridge menu bar menu" width="240">
-  &nbsp;&nbsp;&nbsp;
-  <img src="docs/screenshots/android-app.png" alt="HealthBridge Android app" width="240">
+  <img src="docs/screenshots/macos-dashboard.png" alt="HealthBridge dashboard on macOS" width="600">
+  &nbsp;
+  <img src="docs/screenshots/android-app.png" alt="HealthBridge Android app" width="190">
 </p>
 
 ## Why
@@ -24,8 +23,8 @@ I walk on a treadmill desk and wear my tracker on my ankle, so I can't glance at
 
 ## Features
 
-- **Menu bar stats:** Today's steps and heart rate right in the macOS tray menu.
-- **Dashboard window:** A simple desktop view with the latest values and last sync time.
+- **Menu bar stats:** Today's steps, goal progress and heart rate in the macOS menu bar menu. The icon adapts to light and dark menu bars.
+- **Dashboard window:** Step ring towards your daily goal (10,000 steps), heart rate, connection status and last sync time. Light and dark mode.
 - **Background sync:** An Android foreground service pushes fresh values on an interval you choose (default: every 10 seconds).
 - **Zero-config discovery:** The Android app finds the Mac on your network via mDNS. QR code pairing is available as a fallback.
 - **Local only:** Data goes straight from phone to Mac over your LAN and is kept in memory only.
@@ -95,6 +94,9 @@ Requires JDK 17+ and the Android SDK (`local.properties` with `sdk.dir`).
 
 # Build the Android APK
 ./gradlew :composeApp:assembleDebug
+
+# Render dashboard previews to PNG (no window needed)
+HEALTHBRIDGE_RENDER_PREVIEW=/tmp/hb-preview ./gradlew :desktop:run
 ```
 
 ## Project structure
@@ -103,6 +105,7 @@ Requires JDK 17+ and the Android SDK (`local.properties` with `sdk.dir`).
 | :--- | :--- |
 | `composeApp/` | Android app (Kotlin, Jetpack Compose, Health Connect, CameraX + ML Kit for QR scanning) |
 | `desktop/` | macOS app (Compose Multiplatform for Desktop, Ktor server, JmDNS, ZXing) |
+| `tools/icons/` | Generator for all app, launcher and menu bar icons (`python3 tools/icons/generate_icons.py`, needs Pillow) |
 
 ## Privacy and security
 
